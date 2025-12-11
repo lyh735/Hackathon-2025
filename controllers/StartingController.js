@@ -1,4 +1,5 @@
-const db = require('../db');
+const Starting = require('../models/Starting');
+const User = require('../models/User');
 
 // Display starting page for users
 const displayStarting = (req, res) => {
@@ -6,37 +7,35 @@ const displayStarting = (req, res) => {
         const userId = req.session.user ? req.session.user.id : null;
 
         if (!userId) {
-            return res.status(401).render('Starting', {
+            return res.status(401).render('starting', {
                 message: 'Please log in to continue'
             });
         }
 
         // Retrieve user data from database
-        db.query('SELECT * FROM users WHERE id = ?', [userId], (err, results) => {
+        User.getUserById(userId, (err, user) => {
             if (err) {
                 console.error('Error retrieving user data:', err);
-                return res.status(500).render('Starting', {
+                return res.status(500).render('starting', {
                     message: 'An error occurred while retrieving user data'
                 });
             }
 
-            if (results.length === 0) {
-                return res.status(404).render('Starting', {
+            if (!user) {
+                return res.status(404).render('starting', {
                     message: 'User not found'
                 });
             }
 
-            const user = results[0];
-
             // Render starting view with user data
-            res.render('Starting', {
+            res.render('starting', {
                 user: user,
                 message: null
             });
         });
     } catch (error) {
         console.error('Error in displayStarting:', error);
-        res.status(500).render('Starting', {
+        res.status(500).render('starting', {
             message: 'An unexpected error occurred'
         });
     }
@@ -54,8 +53,8 @@ const getStartingStatus = (req, res) => {
             });
         }
 
-        // Query to get starting status
-        db.query('SELECT * FROM starting WHERE user_id = ?', [userId], (err, results) => {
+        // Get starting info from model
+        Starting.getStartingInfo(userId, (err, starting) => {
             if (err) {
                 console.error('Error retrieving starting status:', err);
                 return res.status(500).json({
@@ -64,7 +63,7 @@ const getStartingStatus = (req, res) => {
                 });
             }
 
-            if (results.length === 0) {
+            if (!starting) {
                 return res.status(200).json({
                     success: true,
                     data: null,
@@ -74,7 +73,7 @@ const getStartingStatus = (req, res) => {
 
             res.status(200).json({
                 success: true,
-                data: results[0],
+                data: starting,
                 message: 'Starting status retrieved successfully'
             });
         });
@@ -99,35 +98,36 @@ const createStarting = (req, res) => {
             });
         }
 
-        const { title, description, startDate } = req.body;
+        const { title, description } = req.body;
 
         // Validate input
         if (!title || !description) {
             return res.status(400).json({
                 success: false,
-                message: 'Missing required fields'
+                message: 'Missing required fields: title and description'
             });
         }
 
-        db.query(
-            'INSERT INTO starting (user_id, title, description, start_date, created_at) VALUES (?, ?, ?, ?, NOW())',
-            [userId, title, description, startDate || new Date()],
-            (err, result) => {
-                if (err) {
-                    console.error('Error creating starting record:', err);
-                    return res.status(500).json({
-                        success: false,
-                        message: 'Database error'
-                    });
-                }
+        const startingData = {
+            title,
+            description
+        };
 
-                res.status(201).json({
-                    success: true,
-                    data: { id: result.insertId },
-                    message: 'Starting record created successfully'
+        Starting.createStarting(userId, startingData, (err, starting) => {
+            if (err) {
+                console.error('Error creating starting record:', err);
+                return res.status(500).json({
+                    success: false,
+                    message: 'Database error: ' + err.message
                 });
             }
-        );
+
+            res.status(201).json({
+                success: true,
+                data: starting,
+                message: 'Starting record created successfully'
+            });
+        });
     } catch (error) {
         console.error('Error in createStarting:', error);
         res.status(500).json({
