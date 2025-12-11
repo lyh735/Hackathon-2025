@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Trivia Quiz</title>
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      padding: 24px 20px 32px;
+      box-sizing: border-box;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.9);
+      border-radius: 18px;
+      padding: 24px 22px;
+      box-shadow: 0 18px 35px rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: 1.9rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .glitch-title {
+      position: relative;
+    }
+
+    .subtitle {
+      margin: 0 0 22px;
+      font-size: 0.95rem;
+      color: #9ca3af;
+    }
+
+    .question {
+      margin-bottom: 10px;
+      padding: 14px 14px 16px;
+      border-radius: 14px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      position: relative;
+    }
+
+    .question-title {
+      margin: 4px 0 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .options {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .options li {
+      margin: 4px 0;
+    }
+
+    .option-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      color: #e5e7eb;
+    }
+
+    .option-label input[type="radio"] {
+      accent-color: #f97316;
+      cursor: pointer;
+    }
+
+    .ai-response {
+      margin-top: 10px;
+      font-size: 0.9rem;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.95);
+      border-left: 3px solid #6b7280;
+      color: #d1d5db;
+    }
+
+    .ai-response.right {
+      border-left-color: #22c55e;
+    }
+
+    .ai-response.wrong {
+      border-left-color: #ef4444;
+    }
+
+    .ai-response.system {
+      border-left-color: #6b7280;
+      font-style: italic;
+      color: #9ca3af;
+    }
+
+    .question-footer {
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .ai-button {
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: linear-gradient(to right, #f97316, #f59e0b);
+      color: #111827;
+      box-shadow: 0 8px 16px rgba(249, 115, 22, 0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ai-button span {
+      font-size: 0.85rem;
+    }
+
+    .ai-button:active {
+      transform: translateY(1px);
+      box-shadow: 0 4px 10px rgba(249, 115, 22, 0.35);
+    }
+
+    .next-button {
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      cursor: pointer;
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .next-button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .question-index {
+      font-size: 0.8rem;
+      color: #6b7280;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        padding: 18px 14px 22px;
+      }
+
+      .question {
+        padding: 12px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1 class="glitch-title">AI Trivia quiz</h1>
+      <p class="subtitle">
+        This “AI” has a bug: it insists the correct answer is wrong and praises wrong answers.
+        Questions appear one by one. Try picking the obvious answer.
+      </p>
+
+      <div id="quiz"></div>
+
+      <!-- NEW: Next game button leading to DumbWaysToAI / index.html -->
+      <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+        <button class="next-button" id="next-game-btn">
+          Next Game: Dumb Ways to AI ➜
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- anime.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+
+  <script>
+    // Very simple, obvious questions
+    const questions = [
+      {
+        text: "What is the smallest planet in the Solar System?",
+        options: ["The Sun", "Mercury", "Earth", "Venus"],
+        correctIndex: 1 // Mercury
+      },
+      {
+        text: "What color is the clear daytime sky?",
+        options: ["Green", "Blue", "Red", "Yellow"],
+        correctIndex: 1 // Blue
+      },
+      {
+        text: "What is 2 + 2?",
+        options: ["3", "4", "5", "22"],
+        correctIndex: 1 // 4
+      },
+      {
+        text: "What do humans mainly breathe in to stay alive?",
+        options: ["Oxygen", "Water", "Sand", "Rocks"],
+        correctIndex: 0 // Oxygen
+      }
+    ];
+
+    const quizContainer = document.getElementById("quiz");
+    let currentQuestionIndex = 0;
+
+    function renderQuestion(index) {
+      const q = questions[index];
+
+      // Clear previous content
+      quizContainer.innerHTML = "";
+
+      const questionDiv = document.createElement("div");
+      questionDiv.className = "question";
+
+      const indexLabel = document.createElement("span");
+      indexLabel.className = "question-index";
+      indexLabel.textContent = `Question ${index + 1} of ${questions.length}`;
+
+      const title = document.createElement("p");
+      title.className = "question-title";
+      title.textContent = q.text;
+
+      const optionsList = document.createElement("ul");
+      optionsList.className = "options";
+
+      q.options.forEach((opt, optIndex) => {
+        const li = document.createElement("li");
+
+        const label = document.createElement("label");
+        label.className = "option-label";
+
+        const radio = document.createElement("input");
+        radio.type = "radio";
+        radio.name = "question-" + index;
+        radio.value = optIndex;
+
+        const textNode = document.createTextNode(opt);
+
+        label.appendChild(radio);
+        label.appendChild(textNode);
+        li.appendChild(label);
+        optionsList.appendChild(li);
+      });
+
+      const footer = document.createElement("div");
+      footer.className = "question-footer";
+
+      const askButton = document.createElement("button");
+      askButton.className = "ai-button";
+      askButton.innerHTML = '<span>Ask the AI</span> 🤖';
+
+      const nextButton = document.createElement("button");
+      nextButton.className = "next-button";
+      nextButton.innerHTML = index === questions.length - 1
+        ? 'Restart Quiz ↻'
+        : 'Next Question ➜';
+
+      const response = document.createElement("p");
+      response.className = "ai-response system";
+      response.textContent = "AI: I'm ready. Choose an option and ask me.";
+
+      // ASK AI button behavior
+      askButton.addEventListener("click", () => {
+        const selected = questionDiv.querySelector("input[type='radio']:checked");
+
+        if (!selected) {
+          response.textContent = "AI: Please pick an answer first!";
+          response.className = "ai-response.system";
+          subtleGlitch(response);
+          return;
+        }
+
+        const selectedIndex = parseInt(selected.value, 10);
+        const selectedText = q.options[selectedIndex];
+
+        // INTENTIONALLY WRONG LOGIC:
+        // If the user picks the TRUE correct answer, AI says it is wrong.
+        // If the user picks a WRONG answer, AI says it is correct.
+        if (selectedIndex === q.correctIndex) {
+          response.textContent = `AI: "${selectedText}" is not the correct answer.`;
+          response.className = "ai-response wrong";
+          bigGlitch(response);   // strong glitch when AI is confidently wrong
+        } else {
+          response.textContent = `AI: Correct! "${selectedText}" is the right answer.`;
+          response.className = "ai-response right";
+          subtleGlitch(response); // softer glitch when it thinks it's right
+        }
+      });
+
+      // NEXT QUESTION / RESTART button
+      nextButton.addEventListener("click", () => {
+        if (currentQuestionIndex < questions.length - 1) {
+          currentQuestionIndex++;
+          renderQuestion(currentQuestionIndex);
+        } else {
+          // Restart quiz from first question
+          currentQuestionIndex = 0;
+          renderQuestion(currentQuestionIndex);
+        }
+      });
+
+      footer.appendChild(askButton);
+      footer.appendChild(nextButton);
+
+      questionDiv.appendChild(indexLabel);
+      questionDiv.appendChild(title);
+      questionDiv.appendChild(optionsList);
+      questionDiv.appendChild(footer);
+      questionDiv.appendChild(response);
+
+      quizContainer.appendChild(questionDiv);
+
+      // Re-init button hover animations for the newly created buttons
+      initButtonHover();
+    }
+
+    // --- ANIME.JS ANIMATIONS ---
+
+    // Floating card animation + ambient subtle motion
+    function initCardFloat() {
+      anime({
+        targets: ".card",
+        translateY: [0, -4],
+        duration: 4500,
+        direction: "alternate",
+        easing: "easeInOutSine",
+        loop: true
+      });
+    }
+
+    // Glitchy title animation (looping)
+    function initGlitchTitle() {
+      anime.timeline({ loop: true })
+        .add({
+          targets: ".glitch-title",
+          translateX: [0, -2, 2, -1, 1, 0],
+          duration: 280,
+          easing: "steps(4)",
+          delay: 1400
+        })
+        .add({
+          targets: ".glitch-title",
+          skewX: [0, 3, -3, 0],
+          duration: 220,
+          easing: "steps(3)"
+        })
+        .add({
+          targets: ".glitch-title",
+          duration: 1800 // pause-ish
+        });
+    }
+
+    // Button hover flicker (for AI + Next buttons + Next Game button)
+    function initButtonHover() {
+      const buttons = document.querySelectorAll(".ai-button, .next-button");
+      buttons.forEach((btn) => {
+        btn.addEventListener("mouseenter", () => {
+          anime({
+            targets: btn,
+            scale: [1, 1.04],
+            duration: 180,
+            easing: "easeOutQuad"
+          });
+
+          anime({
+            targets: btn,
+            translateX: [0, 1, -1, 0],
+            duration: 80,
+            easing: "steps(3)"
+          });
+        });
+
+        btn.addEventListener("mouseleave", () => {
+          anime({
+            targets: btn,
+            scale: 1,
+            duration: 200,
+            easing: "easeOutQuad"
+          });
+        });
+      });
+    }
+
+    // Small glitch effect (for "system" or correct responses)
+    function subtleGlitch(el) {
+      anime.remove(el);
+      anime({
+        targets: el,
+        keyframes: [
+          { translateX: -1, duration: 30 },
+          { translateX: 2, duration: 40 },
+          { translateX: -2, duration: 40 },
+          { translateX: 0, duration: 50 }
+        ],
+        easing: "easeInOutQuad"
+      });
+    }
+
+    // Bigger, more chaotic glitch for wrong answers
+    function bigGlitch(el) {
+      anime.remove(el);
+      anime({
+        targets: el,
+        keyframes: [
+          { translateX: -3, skewX: -3, duration: 40 },
+          { translateX: 4, skewX: 2, duration: 40 },
+          { translateX: -4, skewX: -2, duration: 40 },
+          { translateX: 3, skewX: 3, duration: 40 },
+          { translateX: 0, skewX: 0, duration: 60 }
+        ],
+        opacity: [
+          { value: 0.7, duration: 50 },
+          { value: 1, duration: 50 }
+        ],
+        easing: "easeInOutQuad"
+      });
+    }
+
+    function initAnimations() {
+      initCardFloat();
+      initGlitchTitle();
+    }
+
+    // Handle "Next Game" button → go to DumbWaysToAI (index.html)
+    const nextGameBtn = document.getElementById("next-game-btn");
+    if (nextGameBtn) {
+      nextGameBtn.addEventListener("click", () => {
+        // This assumes confused-ai-quiz2.html and index.html are in the same folder
+        window.location.href = "index.html";
+      });
+    }
+
+    // Initial setup
+    initAnimations();
+    renderQuestion(currentQuestionIndex);
+  </script>
+</body>
+</html>

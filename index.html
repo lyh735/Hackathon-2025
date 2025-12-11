@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake ChatGPT Lesson</title>
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Anime.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+</head>
+
+<body>
+<header class="site-header">
+    <span>ChatABC</span>
+    <button id="next-page" class="next-arrow" aria-label="Next page">→</button>
+</header>
+
+<div class="chat-container">
+    <div class="messages" id="messages"></div>
+
+    <div class="input-area">
+        <button class="choice" onclick="selectQuestion('What is two plus two?')">
+            What is two plus two?
+        </button>
+
+        <button class="choice" onclick="selectQuestion('What is the capital of France?')">
+            What is the capital of France?
+        </button>
+    </div>
+</div>
+
+<!-- JS -->
+<script src="js/app.js"></script>
+
+</body>
+</html>
