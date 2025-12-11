@@ -294,6 +294,216 @@ const Mission = {
             console.error('Error in getTotalMissionsCompleted:', error);
             callback(error, null);
         }
+    },
+
+    // Create a new mission (admin only)
+    createMission: (missionData, callback) => {
+        try {
+            const { title, description, reward_points, category, difficulty_level } = missionData;
+
+            // Validate required fields
+            if (!title || !description || reward_points === undefined) {
+                return callback(new Error('Title, description, and reward points are required'), null);
+            }
+
+            // Validate reward points
+            if (isNaN(reward_points) || reward_points < 0) {
+                return callback(new Error('Reward points must be a non-negative number'), null);
+            }
+
+            const query = `
+                INSERT INTO missions (title, description, reward_points, category, difficulty_level, created_at)
+                VALUES ($1, $2, $3, $4, $5, NOW())
+                RETURNING mission_id, title, description, reward_points, category, difficulty_level, created_at
+            `;
+
+            db.query(query, [title, description, reward_points, category || null, difficulty_level || null], (err, results) => {
+                if (err) {
+                    console.error('Error creating mission:', err);
+                    return callback(err, null);
+                }
+
+                callback(null, results.rows[0]);
+            });
+        } catch (error) {
+            console.error('Error in createMission:', error);
+            callback(error, null);
+        }
+    },
+
+    // Update mission (admin only)
+    updateMission: (missionId, missionData, callback) => {
+        try {
+            if (!missionId) {
+                return callback(new Error('Mission ID is required'), null);
+            }
+
+            const { title, description, reward_points, category, difficulty_level } = missionData;
+
+            // Check if mission exists
+            const checkQuery = `
+                SELECT mission_id FROM missions WHERE mission_id = $1
+            `;
+
+            db.query(checkQuery, [missionId], (err, checkResults) => {
+                if (err) {
+                    console.error('Error checking mission existence:', err);
+                    return callback(err, null);
+                }
+
+                if (checkResults.rows.length === 0) {
+                    return callback(new Error('Mission not found'), null);
+                }
+
+                // Validate reward points if provided
+                if (reward_points !== undefined && (isNaN(reward_points) || reward_points < 0)) {
+                    return callback(new Error('Reward points must be a non-negative number'), null);
+                }
+
+                // Build dynamic update query
+                let query = 'UPDATE missions SET ';
+                let params = [];
+                let paramCount = 1;
+
+                if (title !== undefined) {
+                    query += `title = $${paramCount}`;
+                    params.push(title);
+                    paramCount++;
+                }
+
+                if (description !== undefined) {
+                    if (params.length > 0) query += ', ';
+                    query += `description = $${paramCount}`;
+                    params.push(description);
+                    paramCount++;
+                }
+
+                if (reward_points !== undefined) {
+                    if (params.length > 0) query += ', ';
+                    query += `reward_points = $${paramCount}`;
+                    params.push(reward_points);
+                    paramCount++;
+                }
+
+                if (category !== undefined) {
+                    if (params.length > 0) query += ', ';
+                    query += `category = $${paramCount}`;
+                    params.push(category);
+                    paramCount++;
+                }
+
+                if (difficulty_level !== undefined) {
+                    if (params.length > 0) query += ', ';
+                    query += `difficulty_level = $${paramCount}`;
+                    params.push(difficulty_level);
+                    paramCount++;
+                }
+
+                if (params.length === 0) {
+                    return callback(new Error('No fields to update'), null);
+                }
+
+                query += ` WHERE mission_id = $${paramCount} RETURNING mission_id, title, description, reward_points, category, difficulty_level`;
+                params.push(missionId);
+
+                db.query(query, params, (err, results) => {
+                    if (err) {
+                        console.error('Error updating mission:', err);
+                        return callback(err, null);
+                    }
+
+                    callback(null, results.rows[0]);
+                });
+            });
+        } catch (error) {
+            console.error('Error in updateMission:', error);
+            callback(error, null);
+        }
+    },
+
+    // Delete mission (admin only)
+    deleteMission: (missionId, callback) => {
+        try {
+            if (!missionId) {
+                return callback(new Error('Mission ID is required'), null);
+            }
+
+            // Check if mission exists
+            const checkQuery = `
+                SELECT mission_id FROM missions WHERE mission_id = $1
+            `;
+
+            db.query(checkQuery, [missionId], (err, checkResults) => {
+                if (err) {
+                    console.error('Error checking mission existence:', err);
+                    return callback(err, null);
+                }
+
+                if (checkResults.rows.length === 0) {
+                    return callback(new Error('Mission not found'), null);
+                }
+
+                // Delete associated completion records first
+                const deleteCompletionsQuery = `
+                    DELETE FROM mission_completions WHERE mission_id = $1
+                `;
+
+                db.query(deleteCompletionsQuery, [missionId], (err) => {
+                    if (err) {
+                        console.error('Error deleting mission completions:', err);
+                        return callback(err, null);
+                    }
+
+                    // Delete the mission
+                    const deleteMissionQuery = `
+                        DELETE FROM missions WHERE mission_id = $1 RETURNING mission_id
+                    `;
+
+                    db.query(deleteMissionQuery, [missionId], (err, results) => {
+                        if (err) {
+                            console.error('Error deleting mission:', err);
+                            return callback(err, null);
+                        }
+
+                        callback(null, { message: 'Mission deleted successfully' });
+                    });
+                });
+            });
+        } catch (error) {
+            console.error('Error in deleteMission:', error);
+            callback(error, null);
+        }
+    },
+
+    // Get all missions (admin - includes all missions with stats)
+    getAllMissionsAdmin: (callback) => {
+        try {
+            const query = `
+                SELECT 
+                    m.mission_id,
+                    m.title,
+                    m.description,
+                    m.reward_points,
+                    m.category,
+                    m.difficulty_level,
+                    m.created_at,
+                    (SELECT COUNT(*) FROM mission_completions WHERE mission_id = m.mission_id) as total_completions
+                FROM missions m
+                ORDER BY m.created_at DESC
+            `;
+
+            db.query(query, (err, results) => {
+                if (err) {
+                    console.error('Error retrieving all missions for admin:', err);
+                    return callback(err, null);
+                }
+
+                callback(null, results.rows);
+            });
+        } catch (error) {
+            console.error('Error in getAllMissionsAdmin:', error);
+            callback(error, null);
+        }
     }
 };
 
