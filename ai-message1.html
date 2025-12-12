@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>When Algorithms Get It Wrong</title>
+<style>
+    body {
+        font-family: system-ui, sans-serif;
+        background: #0f172a;
+        color: #e5e7eb;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        text-align: center;
+        padding: 20px;
+        margin: 0;
+    }
+
+    .card {
+        background: rgba(15, 23, 42, 0.9);
+        padding: 30px;
+        border-radius: 16px;
+        max-width: 600px;
+        border: 1px solid rgba(148,163,184,0.4);
+    }
+
+    h1 { margin-bottom: 16px; }
+
+    p { margin-bottom: 10px; }
+
+    .next-button {
+        margin-top: 24px;
+        padding: 10px 18px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid #4b5563;
+        color: #e5e7eb;
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        cursor: pointer;
+    }
+
+    .next-button:hover {
+        background: rgba(30, 41, 59, 0.9);
+    }
+</style>
+</head>
+<body>
+
+<div class="card">
+    <h1>When Algorithms Get It Wrong</h1>
+
+    <p>AI can:</p>
+    <p>• Make confident mistakes</p>
+    <p>• Reinforce incorrect information</p>
+    <p>• Get things wrong without knowing it</p>
+
+    <br>
+
+    <p>
+        Critical thinking still matters — especially when the answer seems obvious.<br>
+        AI responses are not guarantees. Always question, verify, and think for yourself.
+    </p>
+
+    <!-- NEW NEXT BUTTON -->
+    <button class="next-button" id="go-chatbot">Next ➜</button>
+</div>
+
+<script>
+    // Go to ChatABC chatbot (index.html)
+    document.getElementById("go-chatbot").addEventListener("click", () => {
+        window.location.href = "index.html"; // Links to ChatABC interface
+    });
+</script>
+
+</body>
+</html>
