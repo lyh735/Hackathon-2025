@@ -2,25 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Next Feature</title>
+    <title>Even Simple Questions Can Get Complicated with AI</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Page-specific centering */
+        .message-wrapper {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .message-card {
+            max-width: 640px;
+            background: #1e293b;
+            border-radius: 16px;
+            border: 1px solid #334155;
+            padding: 28px 24px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            text-align: left;
+        }
+        .message-card h1 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1.5rem;
+        }
+        .message-card p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        /* Next button inside the card */
+        .next-button {
+        margin-top: 24px;
+        padding: 10px 18px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9); /* transparent / dark */
+        border: 1px solid #4b5563;
+        color: #e5e7eb;
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        cursor: pointer;
+    }
+    .next-button:hover {
+        background: rgba(30, 41, 59, 0.9);
+    }
+    </style>
 </head>
 <body>
-<header class="site-header">ChatABC</header>
 
-<div class="chat-container">
-    <div class="messages" id="messages">
-        <div class="bubble ai">
-            Build your new website function here. You can replace this page with any UI or logic you need.
-        </div>
-    </div>
+<div class="message-wrapper">
+    <div class="message-card">
+        <h1>Even Simple Questions Can Get Complicated with AI</h1>
 
-    <div class="input-area">
-        <button class="choice" onclick="window.location.href='index.html'">Back to start</button>
-        <button class="choice" onclick="window.location.href='page2.html'">Back to page 2</button>
-        <button class="choice" onclick="window.location.href='deadline.html'">→ Go to Deadline</button>
+        <p>
+            The chatbot was asked some of the most basic questions possible — questions most people can answer instantly.
+            Yet the AI took a long time to respond and still gave the wrong answer.
+        </p>
+
+        <p>
+            AI predicts answers based on patterns, which means it can be slow, overconfident, and incorrect, even for simple things.
+        </p>
+
+        <p>
+            That’s why AI should be a tool, not a truth source.<br>
+            Always think critically and verify information.
+        </p>
+
+        <!-- NEW NEXT BUTTON -->
+        <button class="next-button" onclick="window.location.href='deadline.html'">
+            Next ➜
+        </button>
     </div>
 </div>
+
 </body>
 </html>
